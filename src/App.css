@@ -24,8 +24,14 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.icon-unliked {
+  color: rgba(78, 55, 55, 0.424);
+  cursor: pointer;
+}
+
+.icon-liked {
+  color: red;
+  cursor: pointer;
 }
 
 @keyframes App-logo-spin {
