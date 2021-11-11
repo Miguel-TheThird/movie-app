@@ -2,14 +2,23 @@ import React from 'react';
 import { getMovies } from '../services/fakeMovieService'
 import Like from './common/like';
 import Pagination from './common/pagination';
-import {paginate} from '../utils/paginate'
+import {paginate} from '../utils/paginate';
+import ListGroup from './common/listGroup';
+import { getGenres } from '../services/fakeGenreService'
+
 
 
 class Movies extends React.Component {
     state = {
-        movies: getMovies(),
+        movies: [], //It's good to initialize them with an empty array because you want everything else to be rendered before calling an API or in thi case the fake services
+        genres: [],
         pageSize: 4,
         currentPage: 1
+    }
+
+    componentDidMount(){
+        const genres = [{ name: "All Genres" }, ...getGenres() ]//Just adding "All Genres" option to the list
+      this.setState({ movies: getMovies(), genres: genres })  
     }
 
     handleDelete = movie => { //this movie parameter comes from the map. So when click, we pass a movie  with all its properties to this function
@@ -42,6 +51,11 @@ class Movies extends React.Component {
         this.setState({currentPage : page})
     };
 
+    handleGenreSelect = genre => {
+        console.log(" The genre is: " , genre)
+        this.setState({ selectedGenre: genre });
+    }
+
     render() { 
         //OBJECT DESTRUCTURING
         const { length: count } = this.state.movies //this.state.movies.length passed to constant length, and at the same time renaming lenght to count 
@@ -50,11 +64,26 @@ class Movies extends React.Component {
         }
         //else is implied here so it will rend the list is length us bigger than zero
 
-        const newMoviesPaginated = paginate(this.state.movies, this.state.currentPage, this.state.pageSize)
+        //Filter before pagination
+        /* const  filtered = this.state.selectedGenre && this.state.selectedGenre._id ? this.state.movies.filter(m => m.genre._id === this.state.selectedGenre._id)
+        : this.state.movies */
+
+        //const newMoviesPaginated = paginate(this.state.movies, this.state.currentPage, this.state.pageSize)
         
         return (
-            <React.Fragment>
-            <p>Showing {count} movies in the database.</p>
+            <div className="row">
+                <div className="col-2">
+                    <ListGroup 
+                    items={this.state.genres} 
+                    selectedItem={this.state.selectedGenre}
+                    onItemSelect={this.handleGenreSelect}                 
+                    //valueProperty="_id" /* This is to make the component more flexible in case the input have a different name, so now this 2 properties will determine the name of the target property */
+                   // textProperty="name" /* same as above //DELETED BECAUSE I'M USING DEFAULT PROPS IN THE COMPONENT */
+                    />
+                </div>
+
+                <div className="col"> {/* Right colum */}
+                <p>Showing {count} movies in the database.</p>
             <table className="table">
                 <thead>
                     <tr>
@@ -67,7 +96,7 @@ class Movies extends React.Component {
                     </tr>
                 </thead>
                 <tbody>
-                    {newMoviesPaginated.map(movie => ( //{this.state.movies.map(movie =>... First solution
+                    {this.state.movies.map(movie => ( //{this.state.movies.map(movie =>... First solution
                         <tr key={movie._id}>
                         <td>{movie.title}</td>
                         <td>{movie.genre.name}</td>
@@ -85,7 +114,9 @@ class Movies extends React.Component {
             pageSize={this.state.pageSize} 
             onPageChange={this.handlePageChange}
             currentPage={this.state.currentPage} />
-            </React.Fragment>
+
+                </div>            
+            </div>
         );
     }
 }
